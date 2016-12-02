@@ -3,50 +3,56 @@ $( document ).ready(function() {
 var topics = ["books", "movies", "food", "games", "cute boys", "sleeping"]
 
 function renderButtons() {
-	$("#topic_buttons").empty();
+	$("#topic_buttons").empty();	//empties out hTML element
 
-	topics.forEach(function(item){
-		var topic = $('<button class="btn btn-primary btn-lg">' + item + '</button>');
-		$("#topic_buttons").append(topic);
+	topics.forEach(function(item){	//iterates through each topic
+		var topic = $('<button class="btn btn-primary btn-lg">' + item + '</button>'); //writes name to button
+		$("#topic_buttons").append(topic);	//adds button
 	}) //topics for each closed
 }
 
 function display_gifs (){
-	var topic_url ="http://api.giphy.com/v1/gifs/search?q=" + this.textContent  + "&limit=10" +"&api_key=dc6zaTOxFJmzC";  
+	$("#topic_gifs").empty();	//clears out img tags
+	var topic_url ="http://api.giphy.com/v1/gifs/search?q=" + this.textContent  + "&limit=10" +"&api_key=dc6zaTOxFJmzC";  //whatever you clicked on, takes the text content and inserts into url
 	$.ajax({ url: topic_url, method: "GET"}).done(function(response){
-		for (var i=0; i < 10; i++){
-			var gif_still = response.data[i].images.fixed_height_still.url;
-			console.log(gif_still);
-			$("#topic_gifs").append('<img class="still_gifs" />');
-			$("#topic_gifs").children().eq(i).attr("src", gif_still);
-			$("#topic_gifs").children().eq(i).attr("value", i);
+		for (var i=0; i < 10; i++){	//gets first ten images
+			var gif = response.data[i].images.fixed_height_still.url;	
+			$("#topic_gifs").append('<img class="gifs">');	//adds to topic_gifs div
+			$("#topic_gifs").children().eq(i).attr("src", gif);	//sets source equal to earlier retrieved still image
+			$("#topic_gifs").children().eq(i).attr("data-state", "still");	//makes current state a still imag
+			$("#topic_gifs").children().eq(i).attr("data-still", gif);	//makes the data-still state equal to the current one
+			$("#topic_gifs").children().eq(i).attr("data-animate", response.data[i].images.fixed_height.url);	//makes data-animate equal to moving gif
 		}
 
-		$("#topic_gifs").on("click", ".still_gifs", function() {
-			$(this).attr("src", response.data[this.getAttribute('value')].images.fixed_height.url);
-			console.log(this.getAttribute('value')); //THIS IS THE ONLY ONE THAT WORKS
-		})	//still_gifs click close 
 	}) 
 };
-//can do if an iff statement... if it equals moving one, changed to fix one.. etc
+
+function play_gifs(){
+	var state = $(this).attr("data-state");	//sets state equal to whatever it is, still or animate
+	console.log(this);
+	if (state === "still"){	//if gif isn't moving
+		$(this).attr("src", $(this).data("animate"));	//changes source to moving gif
+		$(this).attr("data-state", "animate");  	//updates data state
+	}
+	else {	//if gif IS moving
+		$(this).attr("src", $(this).data("still"));	//fixes it to stop moving
+		$(this).attr("data-state", "still");	
+	}	
+}
 
 $("#add_topic").on("click", function(event){
-	event.preventDefault();
-	var new_topic = $("#topic_input").val().trim();
-	topics.push(new_topic);
-	// NEED NEW FUNCTION TO RENDER BUTTONS!!!!
-	renderButtons();
+	event.preventDefault();	//prevents it from refreshing page
+	var new_topic = $("#topic_input").val().trim();	//take topic input, trims white space
+	topics.push(new_topic);	//adds submitted text to buttons array
+	renderButtons();	//calls function to display buttons
 })	//submit button close
 
-$(document).on("click", "button", display_gifs);
-
-renderButtons();
+$(document).on("click", "button", display_gifs);	//if any topic gif is clicked
+$(document).on("click", "img", play_gifs);	//if any gif is clicked
+renderButtons(); 	
 
 
 }); //document ready closed
 
 
-// The public beta key is "dc6zaTOxFJmzC”
 
-
-//help with playing/stopping gifs: http://stackoverflow.com/questions/5818003/stop-a-gif-animation-onload-on-mouseover-start-the-activation
