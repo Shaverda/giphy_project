@@ -29,7 +29,6 @@ function display_gifs (){
 
 function play_gifs(){
 	var state = $(this).attr("data-state");	//sets state equal to whatever it is, still or animate
-	console.log(this);
 	if (state === "still"){	//if gif isn't moving
 		$(this).attr("src", $(this).data("animate"));	//changes source to moving gif
 		$(this).attr("data-state", "animate");  	//updates data state
